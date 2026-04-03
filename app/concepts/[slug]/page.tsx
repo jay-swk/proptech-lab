@@ -6,7 +6,9 @@ import {
   getConceptBySlug,
   getRelatedConcepts,
 } from "@/content/concepts";
+import { getQuizzesBySlug } from "@/content/concepts/quizzes";
 import { ConceptCard } from "@/components/concepts/ConceptCard";
+import { ConceptQuiz } from "@/components/concepts/ConceptQuiz";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -32,6 +34,7 @@ export default async function ConceptDetailPage({ params }: Props) {
   if (!concept) notFound();
 
   const related = getRelatedConcepts(concept);
+  const quizzes = getQuizzesBySlug(slug);
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -98,6 +101,8 @@ export default async function ConceptDetailPage({ params }: Props) {
           {concept.tip}
         </p>
       </section>
+
+      {quizzes.length > 0 && <ConceptQuiz quizzes={quizzes} />}
 
       <div className="flex justify-center">
         <Link
