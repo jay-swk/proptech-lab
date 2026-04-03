@@ -1,41 +1,40 @@
 # Nova State
 
 ## Current
-- **Goal**: 용도지역 프리셋 & 수익성 간이 분석 기능 추가
+- **Goal**: 프롭테크 인터랙티브 학습 서비스 기능 확장
 - **Phase**: building
 - **Blocker**: none
 
 ## Tasks
 | Task | Status | Verdict | Note |
 |------|--------|---------|------|
-| Plan 작성 | done | PASS | docs/plans/002-zoning-presets-profitability.md |
-| Design 작성 | done | PASS | docs/designs/002-zoning-presets-profitability.md |
-| S1: 용도지역 프리셋 구현 | doing | - | 드롭다운 + 슬라이더 연동 |
-| S2: 수익성 분석 패널 구현 | todo | - | 건축비·임대수익·수익률 |
-| S3: 개념 사전 확장 | todo | - | 용도지역·건축비·임대수익률 |
-| Gap 검증 | todo | - | 설계 대비 누락 확인 |
+| 용도지역 프리셋 & 수익성 분석 | done | PASS | commit 0387161 |
+| 시나리오 비교 & 실제 사례 프리셋 | done | PASS | commit f29d8a3 |
+| 개념별 인터랙티브 퀴즈 | done | PASS | commit 795ca2a |
+| GitHub Pages 배포 | todo | - | main push 필요 |
 
 ## Recently Done (최근 3개만)
 | Task | Completed | Verdict | Ref |
 |------|-----------|---------|-----|
-| Plan 작성 | 2026-04-03 | PASS | docs/plans/002-*.md |
-| Design 작성 | 2026-04-03 | PASS | docs/designs/002-*.md |
-| MVP 구현 + 배포 | 2026-04 | PASS | commit 2aeea4c |
+| 개념 퀴즈 (18문제) | 2026-04-03 | PASS | commit 795ca2a |
+| 시나리오 비교 + 6개 사례 프리셋 | 2026-04-03 | PASS | commit f29d8a3 |
+| 용도지역 프리셋 + 수익성 분석 | 2026-04-03 | PASS | commit 0387161 |
 
 ## Known Risks
 | 위험 | 심각도 | 상태 |
 |------|--------|------|
-| 단가 데이터 정확성 | low | 사용자 수정 가능으로 보완 |
+| 단가 데이터 정확성 | low | 사용자 수정 가능 |
 
 ## Known Gaps (미커버 영역)
 | 영역 | 미커버 내용 | 우선순위 |
 |------|-----------|----------|
 | 테스트 | 자동 테스트 없음 | medium |
+| 접근성 | 키보드 네비게이션 미검증 | low |
 
 ## Last Activity
-- /nova:design → 완료 — docs/designs/002-zoning-presets-profitability.md | 2026-04-03
+- 3개 기능 연속 구현 완료 | 2026-04-03
 
 ## Refs
-- Plan: docs/plans/002-zoning-presets-profitability.md
-- Design: docs/designs/002-zoning-presets-profitability.md
-- Last Verification: none
+- Plan: docs/plans/002-*.md, 003-*.md, 004-*.md
+- Design: docs/designs/002-*.md, 003-*.md
+- Last Verification: QA 서브에이전트 실행 중
