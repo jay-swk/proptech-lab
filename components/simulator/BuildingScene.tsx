@@ -1,281 +1,246 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, RoundedBox } from "@react-three/drei";
+import { useMemo } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import { useSimulatorStore } from "@/store/simulatorStore";
 
 const SCALE = 0.02;
-const FLOOR_HEIGHT = 3;
+const FH = FLOOR_HEIGHT_WORLD();
+function FLOOR_HEIGHT_WORLD() { return 3 * 0.02; } // 층고 3m × SCALE
 
-// --- 대지 ---
-function LandMesh({ landArea }: { landArea: number }) {
-  const side = Math.sqrt(landArea) * SCALE;
-  const landRef = useRef<THREE.Group>(null);
-
+// ════════ 대지 ════════
+function Land({ size }: { size: number }) {
   return (
-    <group ref={landRef}>
-      {/* 메인 대지 */}
-      <mesh position={[0, -0.02, 0]} receiveShadow>
-        <boxGeometry args={[side, 0.04, side]} />
-        <meshStandardMaterial color="#8B9467" roughness={0.95} />
+    <group>
+      <mesh position={[0, -0.01, 0]} receiveShadow>
+        <boxGeometry args={[size, 0.02, size]} />
+        <meshStandardMaterial color="#8a9560" roughness={0.9} />
       </mesh>
-      {/* 대지 경계선 */}
-      <lineSegments position={[0, 0.01, 0]}>
-        <edgesGeometry args={[new THREE.BoxGeometry(side, 0.001, side)]} />
-        <lineBasicMaterial color="#D4A574" linewidth={1} />
+      <lineSegments position={[0, 0.005, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(size, 0.001, size)]} />
+        <lineBasicMaterial color="#c8a070" />
       </lineSegments>
-      {/* 주변 도로 */}
-      <mesh position={[0, -0.04, side / 2 + 0.15]} receiveShadow>
-        <boxGeometry args={[side + 0.6, 0.02, 0.3]} />
-        <meshStandardMaterial color="#555555" roughness={0.8} />
+      {/* 도로 */}
+      <mesh position={[0, -0.015, size / 2 + 0.1]}>
+        <boxGeometry args={[size + 0.4, 0.01, 0.2]} />
+        <meshStandardMaterial color="#505050" roughness={0.85} />
       </mesh>
-      {/* 도로 중앙선 */}
-      <mesh position={[0, -0.02, side / 2 + 0.15]}>
-        <boxGeometry args={[side + 0.4, 0.001, 0.02]} />
-        <meshStandardMaterial color="#CCCC00" />
+      <mesh position={[0, -0.005, size / 2 + 0.1]}>
+        <boxGeometry args={[size * 0.8, 0.001, 0.012]} />
+        <meshStandardMaterial color="#cccc00" />
       </mesh>
-      {/* 인도 */}
-      <mesh position={[0, -0.03, side / 2 + 0.02]} receiveShadow>
-        <boxGeometry args={[side + 0.3, 0.03, 0.08]} />
-        <meshStandardMaterial color="#AAAAAA" roughness={0.9} />
-      </mesh>
-      {/* 조경 포인트 (소형 나무 표현) */}
-      {side > 0.3 && (
-        <>
-          <Tree position={[-side / 2 + 0.1, 0, -side / 2 + 0.1]} scale={0.5} />
-          <Tree position={[side / 2 - 0.1, 0, -side / 2 + 0.1]} scale={0.4} />
-        </>
-      )}
+      {/* 나무 */}
+      {size > 0.2 && <MiniTree pos={[-size / 2 + 0.06, 0, -size / 2 + 0.06]} />}
+      {size > 0.3 && <MiniTree pos={[size / 2 - 0.06, 0, -size / 2 + 0.06]} h={0.1} />}
     </group>
   );
 }
 
-function Tree({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
+function MiniTree({ pos, h = 0.13 }: { pos: [number, number, number]; h?: number }) {
   return (
-    <group position={position} scale={scale}>
-      {/* 나무 줄기 */}
-      <mesh position={[0, 0.08, 0]}>
-        <cylinderGeometry args={[0.01, 0.015, 0.16, 6]} />
-        <meshStandardMaterial color="#8B6914" roughness={0.9} />
+    <group position={pos}>
+      <mesh position={[0, h / 2, 0]}>
+        <cylinderGeometry args={[0.006, 0.01, h, 5]} />
+        <meshStandardMaterial color="#7a5c2e" />
       </mesh>
-      {/* 나무 잎 */}
-      <mesh position={[0, 0.2, 0]}>
-        <sphereGeometry args={[0.08, 8, 6]} />
-        <meshStandardMaterial color="#2D8B2D" roughness={0.8} />
+      <mesh position={[0, h + 0.035, 0]}>
+        <sphereGeometry args={[0.045, 6, 5]} />
+        <meshStandardMaterial color="#3a8a3a" roughness={0.8} />
       </mesh>
     </group>
   );
 }
 
-// --- 건물 (용도별 다른 형태) ---
-function BuildingMesh({
-  buildingArea,
+// ════════ 건물 본체 ════════
+function Building({
+  area,
   floors,
   hasError,
-  usageCategory,
+  usage,
 }: {
-  buildingArea: number;
+  area: number;
   floors: number;
   hasError: boolean;
-  usageCategory: "residential" | "commercial" | "industrial";
+  usage: "residential" | "commercial" | "industrial";
 }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const targetHeight = useRef(floors * FLOOR_HEIGHT * SCALE);
-  const currentHeight = useRef(floors * FLOOR_HEIGHT * SCALE);
-  const side = Math.sqrt(buildingArea) * SCALE;
-  const totalHeight = floors * FLOOR_HEIGHT * SCALE;
+  const side = Math.sqrt(area) * SCALE;
+  const h = floors * FH;
+  if (floors === 0 || side < 0.01) return null;
 
-  useEffect(() => {
-    targetHeight.current = totalHeight;
-  }, [totalHeight]);
-
-  useFrame(() => {
-    if (!groupRef.current) return;
-    const lerped = THREE.MathUtils.lerp(currentHeight.current, targetHeight.current, 0.08);
-    currentHeight.current = lerped;
-    const s = totalHeight > 0 ? lerped / totalHeight : 1;
-    groupRef.current.scale.y = s;
-    groupRef.current.position.y = (lerped - totalHeight) / 2;
-  });
-
-  const baseColor = hasError ? "#EF4444" : usageCategory === "commercial" ? "#4A7AB5" : usageCategory === "industrial" ? "#7A8B6F" : "#6B7B8D";
-  const accentColor = hasError ? "#FF6B6B" : usageCategory === "commercial" ? "#7FB5E0" : usageCategory === "industrial" ? "#A0B090" : "#8BA0B5";
-
-  if (usageCategory === "commercial") {
-    return <CommercialBuilding ref={groupRef} side={side} totalHeight={totalHeight} floors={floors} baseColor={baseColor} accentColor={accentColor} />;
-  }
-  if (usageCategory === "industrial") {
-    return <IndustrialBuilding ref={groupRef} side={side} totalHeight={totalHeight} floors={floors} baseColor={baseColor} accentColor={accentColor} />;
-  }
-  return <ResidentialBuilding ref={groupRef} side={side} totalHeight={totalHeight} floors={floors} baseColor={baseColor} accentColor={accentColor} />;
-}
-
-// 주거용: 세트백 형태 (상층부 안쪽으로)
-const ResidentialBuilding = ({ ref, side, totalHeight, floors, baseColor, accentColor }: { ref: React.RefObject<THREE.Group | null>; side: number; totalHeight: number; floors: number; baseColor: string; accentColor: string }) => {
-  const setbackFloor = Math.max(1, Math.floor(floors * 0.7));
-  const lowerHeight = setbackFloor * FLOOR_HEIGHT * SCALE;
-  const upperHeight = totalHeight - lowerHeight;
-  const upperSide = side * 0.8;
+  const errColor = "#cc3333";
+  const palette = {
+    residential: { body: "#5a6a78", window: "#a0c8e0", roof: "#888" },
+    commercial:  { body: "#3a6090", window: "#80b8e8", roof: "#aaa" },
+    industrial:  { body: "#687860", window: "#a0c0a0", roof: "#999" },
+  }[usage];
+  const body = hasError ? errColor : palette.body;
+  const win = hasError ? "#ee9999" : palette.window;
 
   return (
-    <group ref={ref} position={[0, totalHeight / 2, 0]}>
+    <group>
+      {usage === "residential" && <Residential s={side} h={h} floors={floors} body={body} win={win} roof={palette.roof} />}
+      {usage === "commercial" && <Commercial s={side} h={h} floors={floors} body={body} win={win} roof={palette.roof} />}
+      {usage === "industrial" && <Industrial s={side} h={h} floors={floors} body={body} win={win} roof={palette.roof} />}
+    </group>
+  );
+}
+
+// ─── 주거: 하부 + 세트백 상부 ───
+function Residential({ s, h, floors, body, win, roof }: BP) {
+  const cut = Math.max(1, Math.floor(floors * 0.7));
+  const h1 = cut * FH;
+  const h2 = h - h1;
+  const s2 = s * 0.78;
+  const bs = s * 0.9;
+
+  return (
+    <group>
       {/* 하부 */}
-      <mesh position={[0, -totalHeight / 2 + lowerHeight / 2, 0]} castShadow>
-        <boxGeometry args={[side * 0.93, lowerHeight, side * 0.93]} />
-        <meshStandardMaterial color={baseColor} roughness={0.3} metalness={0.15} />
-      </mesh>
-      {/* 상부 세트백 */}
-      {upperHeight > 0 && (
-        <mesh position={[0, -totalHeight / 2 + lowerHeight + upperHeight / 2, 0]} castShadow>
-          <boxGeometry args={[upperSide * 0.93, upperHeight, upperSide * 0.93]} />
-          <meshStandardMaterial color={baseColor} roughness={0.3} metalness={0.15} />
-        </mesh>
+      <Box pos={[0, h1 / 2, 0]} size={[bs, h1, bs]} color={body} />
+      <WinRows s={bs} y0={0} n={cut} color={win} />
+      {/* 상부 */}
+      {h2 > 0.001 && (
+        <>
+          <Box pos={[0, h1 + h2 / 2, 0]} size={[s2, h2, s2]} color={body} />
+          <WinRows s={s2} y0={h1} n={floors - cut} color={win} />
+        </>
       )}
-      {/* 창문 그리드 */}
-      <WindowGrid side={side * 0.93} height={lowerHeight} floors={setbackFloor} offset={-totalHeight / 2} color={accentColor} />
-      {upperHeight > 0 && (
-        <WindowGrid side={upperSide * 0.93} height={upperHeight} floors={floors - setbackFloor} offset={-totalHeight / 2 + lowerHeight} color={accentColor} />
-      )}
-      {/* 옥상 구조물 */}
-      <mesh position={[0, totalHeight / 2 + 0.02, 0]}>
-        <boxGeometry args={[side * 0.3, 0.04, side * 0.3]} />
-        <meshStandardMaterial color="#888888" roughness={0.5} />
+      {/* 옥상 */}
+      <Box pos={[0, h + 0.012, 0]} size={[s * 0.22, 0.024, s * 0.22]} color={roof} />
+      {/* 입구 */}
+      <mesh position={[0, FH * 0.3, bs / 2 + 0.001]}>
+        <planeGeometry args={[bs * 0.18, FH * 0.5]} />
+        <meshStandardMaterial color="#445566" side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
-};
+}
 
-// 상업용: 커튼월(유리벽) 스타일
-const CommercialBuilding = ({ ref, side, totalHeight, floors, baseColor, accentColor }: { ref: React.RefObject<THREE.Group | null>; side: number; totalHeight: number; floors: number; baseColor: string; accentColor: string }) => {
+// ─── 상업: 단일 바디 + 유리 색상 + 층 라인 ───
+function Commercial({ s, h, floors, body, win, roof }: BP) {
+  const bs = s * 0.9;
+
   return (
-    <group ref={ref} position={[0, totalHeight / 2, 0]}>
-      {/* 메인 바디 */}
-      <mesh position={[0, 0, 0]} castShadow>
-        <boxGeometry args={[side * 0.93, totalHeight, side * 0.93]} />
-        <meshStandardMaterial color={baseColor} roughness={0.1} metalness={0.5} />
+    <group>
+      {/* 메인 바디 — 유리 느낌 재질 */}
+      <Box pos={[0, h / 2, 0]} size={[bs, h, bs]} color={body} metalness={0.4} roughness={0.15} />
+      {/* 유리 창문 (바디와 동일 크기, 약간 밝게) */}
+      <WinRows s={bs} y0={0} n={floors} color={win} scale={1.2} />
+      {/* 층 구분선 — 바디 안쪽에만 */}
+      {Array.from({ length: Math.max(0, floors - 1) }, (_, i) => (
+        <mesh key={i} position={[0, (i + 1) * FH, 0]}>
+          <boxGeometry args={[bs + 0.003, 0.005, bs + 0.003]} />
+          <meshStandardMaterial color="#1a2a3a" />
+        </mesh>
+      ))}
+      {/* 옥상 */}
+      <mesh position={[0, h + 0.004, 0]}>
+        <cylinderGeometry args={[bs * 0.15, bs * 0.15, 0.008, 12]} />
+        <meshStandardMaterial color={roof} />
       </mesh>
-      {/* 유리 커튼월 효과 — 전면 */}
-      <mesh position={[0, 0, side * 0.47]}>
-        <planeGeometry args={[side * 0.9, totalHeight * 0.95]} />
-        <meshStandardMaterial color={accentColor} roughness={0.05} metalness={0.7} transparent opacity={0.6} />
-      </mesh>
-      {/* 유리 커튼월 — 측면 */}
-      <mesh position={[side * 0.47, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[side * 0.9, totalHeight * 0.95]} />
-        <meshStandardMaterial color={accentColor} roughness={0.05} metalness={0.7} transparent opacity={0.6} />
-      </mesh>
-      {/* 층 구분 라인 */}
-      {Array.from({ length: floors - 1 }, (_, i) => {
-        const y = (i + 1) * FLOOR_HEIGHT * SCALE - totalHeight / 2;
-        return (
-          <mesh key={i} position={[0, y, 0]}>
-            <boxGeometry args={[side * 0.95, 0.008, side * 0.95]} />
-            <meshStandardMaterial color="#2A3A4A" metalness={0.3} />
+    </group>
+  );
+}
+
+// ─── 공업: 넓적 + 환기구 ───
+function Industrial({ s, h, floors, body, win, roof }: BP) {
+  const sx = s * 0.92;
+  const sz = s * 0.68;
+
+  return (
+    <group>
+      <Box pos={[0, h / 2, 0]} size={[sx, h, sz]} color={body} roughness={0.7} />
+      <WinRows s={sx} depth={sz} y0={0} n={floors} color={win} scale={1.3} />
+      {/* 환기구 */}
+      {[-0.22, 0.22].map((off) => (
+        <mesh key={off} position={[sx * off, h + 0.025, 0]}>
+          <cylinderGeometry args={[0.015, 0.02, 0.05, 6]} />
+          <meshStandardMaterial color={roof} metalness={0.2} />
+        </mesh>
+      ))}
+      <Box pos={[0, h + 0.012, sz * 0.12]} size={[sx * 0.3, 0.024, sz * 0.18]} color="#777" />
+    </group>
+  );
+}
+
+// ════════ 유틸 ════════
+
+interface BP { s: number; h: number; floors: number; body: string; win: string; roof: string }
+
+function Box({ pos, size, color, metalness = 0.1, roughness = 0.35 }:
+  { pos: [number, number, number]; size: [number, number, number]; color: string; metalness?: number; roughness?: number }) {
+  return (
+    <mesh position={pos} castShadow receiveShadow>
+      <boxGeometry args={size} />
+      <meshStandardMaterial color={color} metalness={metalness} roughness={roughness} />
+    </mesh>
+  );
+}
+
+function WinRows({ s, depth, y0, n, color, scale = 1 }:
+  { s: number; depth?: number; y0: number; n: number; color: string; scale?: number }) {
+  const d = depth ?? s;
+  const elements = useMemo(() => {
+    const res: React.ReactElement[] = [];
+    const cols = Math.max(2, Math.min(5, Math.floor(s / (0.08 * scale))));
+    const ww = (s * 0.6) / cols;
+    const wh = FH * 0.4 * scale;
+    const gap = 0.002; // 건물 표면에서 살짝 띄움
+
+    for (let f = 0; f < n; f++) {
+      const y = y0 + FH * (f + 0.55);
+      for (let c = 0; c < cols; c++) {
+        const x = -s * 0.3 + ww * (c + 0.5);
+        // 전/후면
+        res.push(
+          <mesh key={`${f}-${c}-f`} position={[x, y, d / 2 + gap]}>
+            <planeGeometry args={[ww * 0.6, wh]} />
+            <meshStandardMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
           </mesh>
         );
-      })}
-      {/* 옥상 헬리패드 느낌 */}
-      <mesh position={[0, totalHeight / 2 + 0.01, 0]}>
-        <cylinderGeometry args={[side * 0.2, side * 0.2, 0.01, 16]} />
-        <meshStandardMaterial color="#CCCCCC" roughness={0.5} />
-      </mesh>
-    </group>
-  );
-};
-
-// 공업용: 평평한 지붕 + 환기구
-const IndustrialBuilding = ({ ref, side, totalHeight, floors, baseColor, accentColor }: { ref: React.RefObject<THREE.Group | null>; side: number; totalHeight: number; floors: number; baseColor: string; accentColor: string }) => {
-  return (
-    <group ref={ref} position={[0, totalHeight / 2, 0]}>
-      {/* 메인 바디 — 약간 넓적한 형태 */}
-      <mesh position={[0, 0, 0]} castShadow>
-        <boxGeometry args={[side * 0.95, totalHeight, side * 0.75]} />
-        <meshStandardMaterial color={baseColor} roughness={0.7} metalness={0.05} />
-      </mesh>
-      {/* 창문 — 큰 산업용 창 */}
-      <WindowGrid side={side * 0.95} height={totalHeight} floors={floors} offset={-totalHeight / 2} color={accentColor} windowScale={1.5} />
-      {/* 옥상 환기구 */}
-      {[0.2, -0.2].map((xOff) => (
-        <mesh key={xOff} position={[side * xOff, totalHeight / 2 + 0.04, 0]}>
-          <cylinderGeometry args={[0.02, 0.025, 0.08, 8]} />
-          <meshStandardMaterial color="#999999" roughness={0.6} metalness={0.3} />
-        </mesh>
-      ))}
-      {/* 옥상 장비 */}
-      <mesh position={[0, totalHeight / 2 + 0.02, side * 0.15]}>
-        <boxGeometry args={[side * 0.4, 0.04, side * 0.15]} />
-        <meshStandardMaterial color="#777777" roughness={0.5} />
-      </mesh>
-    </group>
-  );
-};
-
-// 창문 그리드 — 4면에 배치
-function WindowGrid({
-  side,
-  height,
-  floors,
-  offset,
-  color,
-  windowScale = 1,
-}: {
-  side: number;
-  height: number;
-  floors: number;
-  offset: number;
-  color: string;
-  windowScale?: number;
-}) {
-  const windows = useMemo(() => {
-    const result: { pos: [number, number, number]; rot: [number, number, number]; w: number; h: number }[] = [];
-    const cols = Math.max(2, Math.min(6, Math.floor(side / (0.08 * windowScale))));
-    const floorH = FLOOR_HEIGHT * SCALE;
-    const winW = (side * 0.7) / cols;
-    const winH = floorH * 0.5 * windowScale;
-
-    for (let f = 0; f < floors; f++) {
-      const y = offset + floorH * (f + 0.55);
-      for (let c = 0; c < cols; c++) {
-        const x = -side * 0.35 + winW * (c + 0.5);
-        // 전면
-        result.push({ pos: [x, y, side / 2 + 0.001], rot: [0, 0, 0], w: winW * 0.7, h: winH });
-        // 후면
-        result.push({ pos: [x, y, -side / 2 - 0.001], rot: [0, Math.PI, 0], w: winW * 0.7, h: winH });
+        res.push(
+          <mesh key={`${f}-${c}-b`} position={[x, y, -(d / 2 + gap)]}>
+            <planeGeometry args={[ww * 0.6, wh]} />
+            <meshStandardMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+          </mesh>
+        );
       }
-      for (let c = 0; c < Math.max(1, cols - 1); c++) {
-        const z = -side * 0.3 + (side * 0.6 / Math.max(1, cols - 1)) * (c + 0.5);
-        // 좌측
-        result.push({ pos: [-side / 2 - 0.001, y, z], rot: [0, -Math.PI / 2, 0], w: winW * 0.7, h: winH });
-        // 우측
-        result.push({ pos: [side / 2 + 0.001, y, z], rot: [0, Math.PI / 2, 0], w: winW * 0.7, h: winH });
+      // 좌/우면
+      const sc = Math.max(1, cols - 1);
+      for (let c = 0; c < sc; c++) {
+        const z = -d * 0.3 + (d * 0.6 / sc) * (c + 0.5);
+        const sw = (d * 0.6 / sc) * 0.6;
+        res.push(
+          <mesh key={`${f}-${c}-l`} position={[-(s / 2 + gap), y, z]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[sw, wh]} />
+            <meshStandardMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+          </mesh>
+        );
+        res.push(
+          <mesh key={`${f}-${c}-r`} position={[s / 2 + gap, y, z]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[sw, wh]} />
+            <meshStandardMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+          </mesh>
+        );
       }
     }
-    return result;
-  }, [side, height, floors, offset, windowScale]);
+    return res;
+  }, [s, d, y0, n, color, scale]);
 
-  if (floors === 0 || side < 0.05) return null;
-
-  return (
-    <>
-      {windows.map((w, i) => (
-        <mesh key={i} position={w.pos} rotation={w.rot}>
-          <planeGeometry args={[w.w, w.h]} />
-          <meshStandardMaterial color={color} roughness={0.1} metalness={0.3} transparent opacity={0.7} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
-    </>
-  );
+  return <>{elements}</>;
 }
 
-// --- 씬 ---
+// ════════ 씬 ════════
+
 function Scene() {
   const { results, params, zoningType } = useSimulatorStore();
   const hasError = results.warnings.some((w) => w.severity === "error");
+  const landSide = Math.sqrt(params.landArea) * SCALE;
+  const bh = params.floors * FH;
 
-  // 용도지역 → 카테고리 매핑
-  const usageCategory: "residential" | "commercial" | "industrial" =
+  const usage: "residential" | "commercial" | "industrial" =
     zoningType === "general-commercial" || zoningType === "neighborhood-commercial"
       ? "commercial"
       : zoningType === "quasi-industrial"
@@ -284,47 +249,38 @@ function Scene() {
 
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <directionalLight
-        position={[6, 12, 8]}
-        intensity={1.5}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
-      <directionalLight position={[-3, 6, -4]} intensity={0.3} />
+      <ambientLight intensity={0.55} />
+      <directionalLight position={[5, 10, 7]} intensity={1.4} castShadow shadow-mapSize={[1024, 1024]} />
+      <directionalLight position={[-3, 5, -3]} intensity={0.25} />
       <Environment preset="city" />
 
-      <LandMesh landArea={params.landArea} />
-      <BuildingMesh
-        buildingArea={results.buildingArea}
-        floors={params.floors}
-        hasError={hasError}
-        usageCategory={usageCategory}
+      <Land size={landSide} />
+      <Building area={results.buildingArea} floors={params.floors} hasError={hasError} usage={usage} />
+
+      {/* 그리드 — 대지 크기 비례 */}
+      <gridHelper
+        args={[landSide + 0.6, Math.min(16, Math.max(6, Math.round(landSide / 0.12))), "#999", "#ccc"]}
+        position={[0, -0.02, 0]}
       />
 
       <OrbitControls
         enablePan={false}
-        minDistance={1}
-        maxDistance={15}
-        minPolarAngle={0.2}
-        maxPolarAngle={Math.PI / 2.2}
-        target={[0, (params.floors * FLOOR_HEIGHT * SCALE) / 3, 0]}
+        minDistance={0.5}
+        maxDistance={10}
+        minPolarAngle={0.3}
+        maxPolarAngle={Math.PI / 2.3}
+        target={[0, Math.max(bh * 0.35, 0.05), 0]}
       />
-
-      {/* 그리드 바닥 */}
-      <gridHelper args={[4, 20, "#cccccc", "#e5e5e5"]} position={[0, -0.05, 0]} />
     </>
   );
 }
 
+// ════════ 내보내기 ════════
+
 export function BuildingScene() {
   return (
-    <div className="w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-sky-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 relative">
-      <Canvas
-        camera={{ position: [4, 3.5, 4], fov: 42 }}
-        shadows
-        gl={{ antialias: true }}
-      >
+    <div className="w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-sky-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
+      <Canvas camera={{ position: [3, 2.5, 3], fov: 44 }} shadows gl={{ antialias: true }}>
         <Scene />
       </Canvas>
     </div>
