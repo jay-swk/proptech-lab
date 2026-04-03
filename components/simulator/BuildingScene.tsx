@@ -117,17 +117,14 @@ function Scene() {
 
 export function BuildingScene() {
   return (
-    <div className="w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+    <div className="w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 relative">
       <Canvas
-        camera={{ position: [4, 4, 4], fov: 45 }}
+        camera={{ position: [5, 5, 5], fov: 40 }}
         shadows
         gl={{ antialias: true }}
       >
         <Scene />
       </Canvas>
-      <div className="absolute bottom-3 right-3 text-xs text-slate-400 dark:text-slate-500 bg-white/70 dark:bg-slate-900/70 px-2 py-1 rounded">
-        드래그로 회전 · 스크롤로 확대
-      </div>
     </div>
   );
 }

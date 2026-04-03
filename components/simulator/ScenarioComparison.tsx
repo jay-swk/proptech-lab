@@ -16,11 +16,13 @@ export function ScenarioComparison() {
   const currentLabel = getZoningPreset(zoningType).label;
 
   if (!savedScenario) {
+    return null;
+  }
+
+  if (false) {
+    // 빈 상태 제거 — 시나리오 저장은 InputPanel의 버튼으로 수행
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 p-6 text-center space-y-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          현재 조건을 저장하고, 다른 조건과 비교해보세요.
-        </p>
+      <div className="hidden">
         <button
           onClick={() => saveScenario()}
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"

@@ -34,8 +34,8 @@ export default function SimulatorPage() {
           <InputPanel />
         </div>
 
-        {/* 중앙: 3D 시각화 */}
-        <div className="lg:min-h-[500px] xl:min-h-[560px]">
+        {/* 중앙: 3D 시각화 — 좌우 패널 높이에 맞춤 */}
+        <div className="lg:h-[calc(100vh-10rem)] lg:max-h-[640px] lg:min-h-[400px]">
           <BuildingVisualization />
         </div>
 
