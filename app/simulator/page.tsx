@@ -3,6 +3,8 @@ import { InputPanel } from "@/components/simulator/InputPanel";
 import { OutputPanel } from "@/components/simulator/OutputPanel";
 import { BuildingVisualization } from "@/components/simulator/BuildingVisualization";
 import { ScenarioInterpretation } from "@/components/simulator/ScenarioInterpretation";
+import { ZoningSelector } from "@/components/simulator/ZoningSelector";
+import { ProfitAnalysis } from "@/components/simulator/ProfitAnalysis";
 
 export const metadata: Metadata = {
   title: "용적률 시뮬레이터 | PropTech Lab",
@@ -18,18 +20,20 @@ export default function SimulatorPage() {
           용적률 시뮬레이터
         </h1>
         <p className="text-slate-500 dark:text-slate-400 mt-2">
-          슬라이더를 조작하면 건물 규모가 실시간으로 계산됩니다.
+          용도지역을 선택하고 슬라이더를 조작하면 건물 규모와 수익성이 실시간으로 계산됩니다.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
+          <ZoningSelector />
           <InputPanel />
           <OutputPanel />
         </div>
         <div className="space-y-6">
           <BuildingVisualization />
           <ScenarioInterpretation />
+          <ProfitAnalysis />
         </div>
       </div>
     </main>

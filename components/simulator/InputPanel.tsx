@@ -1,7 +1,7 @@
 "use client";
 
 import { useSimulatorStore } from "@/store/simulatorStore";
-import { PARAM_RANGES } from "@/libs/simulator/calculations";
+import { PARAM_RANGES, getZoningPreset } from "@/libs/simulator/calculations";
 import { SliderInput } from "@/components/ui/SliderInput";
 
 const PARAM_CONFIG = {
@@ -30,7 +30,22 @@ const PARAM_CONFIG = {
 } as const;
 
 export function InputPanel() {
-  const { params, updateParam, resetToDefault } = useSimulatorStore();
+  const { params, zoningType, updateParam, resetToDefault } =
+    useSimulatorStore();
+
+  const preset = getZoningPreset(zoningType);
+
+  const dynamicRanges = {
+    ...PARAM_RANGES,
+    floorAreaRatio: {
+      ...PARAM_RANGES.floorAreaRatio,
+      max: preset.maxFAR,
+    },
+    buildingCoverageRatio: {
+      ...PARAM_RANGES.buildingCoverageRatio,
+      max: preset.maxBCR,
+    },
+  };
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
@@ -49,7 +64,7 @@ export function InputPanel() {
       {(Object.keys(PARAM_CONFIG) as Array<keyof typeof PARAM_CONFIG>).map(
         (key) => {
           const cfg = PARAM_CONFIG[key];
-          const range = PARAM_RANGES[key];
+          const range = dynamicRanges[key];
           return (
             <SliderInput
               key={key}
@@ -63,7 +78,7 @@ export function InputPanel() {
               tooltip={cfg.tooltip}
             />
           );
-        }
+        },
       )}
     </div>
   );

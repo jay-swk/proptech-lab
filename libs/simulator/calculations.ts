@@ -20,6 +20,111 @@ export interface Warning {
   severity: "error" | "warning" | "info";
 }
 
+// --- 용도지역 ---
+
+export type ZoningType =
+  | "custom"
+  | "residential-1-exclusive"
+  | "residential-2-exclusive"
+  | "residential-1-general"
+  | "residential-2-general"
+  | "residential-3-general"
+  | "quasi-residential"
+  | "general-commercial"
+  | "neighborhood-commercial"
+  | "quasi-industrial";
+
+export type UsageCategory = "residential" | "commercial" | "industrial";
+
+export interface ZoningPreset {
+  type: ZoningType;
+  label: string;
+  maxBCR: number;
+  maxFAR: number;
+  description: string;
+  usageCategory: UsageCategory;
+}
+
+export const ZONING_PRESETS: ZoningPreset[] = [
+  { type: "custom", label: "자유 입력", maxBCR: 80, maxFAR: 1500, description: "제한 없이 자유롭게 값을 설정합니다.", usageCategory: "residential" },
+  { type: "residential-1-exclusive", label: "제1종 전용주거", maxBCR: 50, maxFAR: 100, description: "단독주택 중심의 양호한 주거환경", usageCategory: "residential" },
+  { type: "residential-2-exclusive", label: "제2종 전용주거", maxBCR: 50, maxFAR: 150, description: "공동주택 중심의 양호한 주거환경", usageCategory: "residential" },
+  { type: "residential-1-general", label: "제1종 일반주거", maxBCR: 60, maxFAR: 200, description: "저층 주거환경 보호", usageCategory: "residential" },
+  { type: "residential-2-general", label: "제2종 일반주거", maxBCR: 60, maxFAR: 250, description: "중층 주거환경 조성", usageCategory: "residential" },
+  { type: "residential-3-general", label: "제3종 일반주거", maxBCR: 50, maxFAR: 300, description: "중·고층 주거환경 조성", usageCategory: "residential" },
+  { type: "quasi-residential", label: "준주거", maxBCR: 70, maxFAR: 500, description: "주거 기능 + 상업·업무 혼합", usageCategory: "residential" },
+  { type: "general-commercial", label: "일반상업", maxBCR: 80, maxFAR: 1000, description: "일반적인 상업·업무 기능", usageCategory: "commercial" },
+  { type: "neighborhood-commercial", label: "근린상업", maxBCR: 70, maxFAR: 600, description: "근린지역 일용품·서비스 공급", usageCategory: "commercial" },
+  { type: "quasi-industrial", label: "준공업", maxBCR: 70, maxFAR: 400, description: "경공업 + 주거·상업 혼합", usageCategory: "industrial" },
+];
+
+export function getZoningPreset(type: ZoningType): ZoningPreset {
+  return ZONING_PRESETS.find((p) => p.type === type) ?? ZONING_PRESETS[0];
+}
+
+// --- 수익성 ---
+
+export interface ProfitParams {
+  constructionCostPerPyeong: number; // 만원/평
+  monthlyRentPerPyeong: number;      // 만원/평
+}
+
+export interface ProfitResults {
+  totalConstructionCost: number; // 만원
+  monthlyRentalIncome: number;   // 만원
+  annualRentalIncome: number;    // 만원
+  paybackYears: number;          // 년 (0 = 산정 불가)
+  surfaceYield: number;          // % (0 = 산정 불가)
+}
+
+export const DEFAULT_PROFIT_PARAMS: Record<UsageCategory, ProfitParams> = {
+  residential: { constructionCostPerPyeong: 700, monthlyRentPerPyeong: 5 },
+  commercial: { constructionCostPerPyeong: 800, monthlyRentPerPyeong: 8 },
+  industrial: { constructionCostPerPyeong: 500, monthlyRentPerPyeong: 3 },
+};
+
+export const SQM_PER_PYEONG = 3.3058;
+
+export function calculateProfit(
+  actualFloorArea: number,
+  profitParams: ProfitParams,
+): ProfitResults {
+  const pyeong = actualFloorArea / SQM_PER_PYEONG;
+  const totalConstructionCost = pyeong * profitParams.constructionCostPerPyeong;
+  const monthlyRentalIncome = pyeong * profitParams.monthlyRentPerPyeong;
+  const annualRentalIncome = monthlyRentalIncome * 12;
+  const paybackYears =
+    totalConstructionCost > 0 && annualRentalIncome > 0
+      ? totalConstructionCost / annualRentalIncome
+      : 0;
+  const surfaceYield =
+    totalConstructionCost > 0
+      ? (annualRentalIncome / totalConstructionCost) * 100
+      : 0;
+
+  return {
+    totalConstructionCost,
+    monthlyRentalIncome,
+    annualRentalIncome,
+    paybackYears,
+    surfaceYield,
+  };
+}
+
+export function formatKrw(manwon: number): string {
+  if (manwon === 0) return "0원";
+  const rounded = Math.round(manwon);
+  if (rounded >= 10000) {
+    const eok = Math.floor(rounded / 10000);
+    const remainder = rounded % 10000;
+    if (remainder === 0) return `${eok}억원`;
+    return `${eok}억 ${remainder.toLocaleString()}만원`;
+  }
+  return `${rounded.toLocaleString()}만원`;
+}
+
+// --- 기존 계산 ---
+
 export function calculate(params: SimulatorParams): SimulatorResults {
   const { landArea, floorAreaRatio, buildingCoverageRatio, floors } = params;
 
