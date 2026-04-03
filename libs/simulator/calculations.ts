@@ -230,7 +230,7 @@ export const DEFAULT_PARAMS: SimulatorParams = {
   landArea: 330,
   floorAreaRatio: 200,
   buildingCoverageRatio: 60,
-  floors: 5,
+  floors: 3,
 };
 
 export const PARAM_RANGES = {
