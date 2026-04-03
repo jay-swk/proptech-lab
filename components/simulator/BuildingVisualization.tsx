@@ -28,7 +28,7 @@ export function BuildingVisualization() {
           실시간 반영
         </span>
       </div>
-      <div className="relative">
+      <div className="relative" role="img" aria-label="입력된 조건에 따른 3D 건물 모델. 마우스로 회전 및 확대 가능합니다.">
         <BuildingScene />
       </div>
       <p className="text-xs text-slate-400 dark:text-slate-500">

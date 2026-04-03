@@ -89,6 +89,58 @@ export const concepts: Concept[] = [
     relatedSlugs: ["construction-cost", "zoning-district"],
     category: "finance",
   },
+  {
+    slug: "floor-height",
+    title: "층고와 높이제한",
+    subtitle: "건물의 각 층 높이와 전체 높이 규제",
+    definition:
+      "층고(層高)는 바닥에서 바로 위 바닥까지의 높이입니다. 일반적으로 주거는 2.8~3.0m, 상업은 3.5~4.0m입니다. 건물 전체 높이는 용도지역과 도로 너비에 따라 제한될 수 있으며, 가로구역별 최고 높이 제한이 적용됩니다.",
+    formula: "건물 높이 ≈ 층고 × 층수 | 일반 주거 층고: 2.8~3.0m | 상업 층고: 3.5~4.0m",
+    example:
+      "층고 3m, 10층 건물이면 전체 높이는 약 30m입니다. 같은 10층이라도 상업용(층고 4m)이면 40m가 됩니다. 일부 주거지역은 높이 20m 이하로 제한하기도 합니다.",
+    tip: "같은 용적률이라도 층고가 높으면 층수가 줄어듭니다. 고급 오피스는 층고 4m 이상으로 쾌적하지만, 같은 연면적에서 층수는 적어집니다.",
+    relatedSlugs: ["floor-area-ratio", "zoning-district"],
+    category: "regulation",
+  },
+  {
+    slug: "sunlight-restriction",
+    title: "일조권 사선제한",
+    subtitle: "이웃 건물의 햇빛을 보장하기 위한 건축 규제",
+    definition:
+      "일조권 사선제한은 건물이 이웃 대지의 일조를 방해하지 않도록 건물 높이와 형태를 제한하는 규제입니다. 인접 대지 경계선으로부터 일정 거리를 두고, 높아질수록 뒤로 물러나야 합니다.",
+    formula: "높이 제한 = 정북방향 인접경계선 이격거리 × 2 (일반주거지역 기준)",
+    example:
+      "일반주거지역에서 정북방향 인접 대지 경계선에서 4m 떨어진 지점이면, 해당 위치에서 건물 높이는 최대 8m까지 가능합니다. 이 때문에 주거건물 상층부가 계단식으로 뒤로 빠지는 형태가 됩니다.",
+    tip: "일조권 사선제한은 정북방향에만 적용됩니다. 남향 건물이 유리한 이유 중 하나입니다. 이 제한 때문에 실제 건축 가능한 층수가 용적률 한도보다 적을 수 있습니다.",
+    relatedSlugs: ["building-coverage-ratio", "floor-height"],
+    category: "regulation",
+  },
+  {
+    slug: "parking-requirement",
+    title: "주차장 법정대수",
+    subtitle: "건물 규모에 따라 반드시 확보해야 하는 주차 공간",
+    definition:
+      "건축법에 따라 건물의 용도와 면적에 따라 일정 수 이상의 주차장을 확보해야 합니다. 주차장은 지하에 설치하는 것이 일반적이며, 주차장 면적은 용적률 산정에서 제외됩니다.",
+    formula: "주거: 세대당 1대 이상 (전용면적 60m² 초과 시) | 근린생활시설: 150m²당 1대",
+    example:
+      "30세대 아파트를 지으면 최소 30대의 주차 공간이 필요합니다. 1대당 약 25~30m²가 필요하므로, 지하 주차장 면적만 750~900m²에 달합니다. 이 비용은 건축비에 상당한 비중을 차지합니다.",
+    tip: "주차장 면적은 용적률에 포함되지 않지만, 건축비에는 포함됩니다. 지하 1층 시공비는 지상의 1.5~2배에 달하므로, 주차 대수가 많을수록 사업비가 크게 증가합니다.",
+    relatedSlugs: ["construction-cost", "floor-area-ratio"],
+    category: "regulation",
+  },
+  {
+    slug: "landscaping-area",
+    title: "조경면적",
+    subtitle: "건축 시 반드시 확보해야 하는 녹지 공간",
+    definition:
+      "대지면적이 200m² 이상인 건축물을 지을 때는 대지의 일정 비율 이상을 조경(녹지) 면적으로 확보해야 합니다. 조경은 식재, 잔디, 화단, 소공원 등을 포함합니다.",
+    formula: "조경면적 = 대지면적 × 조경비율 | 주거지역: 대지면적의 15% 이상 (연면적 2,000m² 이상 시)",
+    example:
+      "500m² 대지에 연면적 2,000m² 이상 건물을 짓는다면, 최소 75m²(15%)를 조경으로 확보해야 합니다. 이 면적에는 건물을 지을 수 없으므로 실제 활용 가능한 건축면적이 줄어듭니다.",
+    tip: "조경면적 확보 의무는 건폐율에 직접 영향을 줍니다. 건폐율 상한이 60%여도 조경 15%를 확보하면 실제로는 25%가 비건축 면적이 됩니다. 옥상 조경으로 일부 대체할 수 있는 경우도 있습니다.",
+    relatedSlugs: ["building-coverage-ratio", "land-area"],
+    category: "regulation",
+  },
 ];
 
 export function getConceptBySlug(slug: string): Concept | undefined {

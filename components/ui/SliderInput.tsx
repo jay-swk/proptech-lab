@@ -66,6 +66,7 @@ export function SliderInput({
             step={step}
             onChange={(e) => setInputText(e.target.value)}
             onBlur={handleBlur}
+            aria-label={`${label} 값 입력`}
             className="w-20 text-right text-sm font-mono font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <span className="text-xs text-slate-500 dark:text-slate-400 w-6">
@@ -81,6 +82,10 @@ export function SliderInput({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={`${label} 슬라이더 (${min}${unit} ~ ${max}${unit})`}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
           className="w-full h-2 appearance-none cursor-pointer rounded-full bg-slate-200 dark:bg-slate-700 slider"
           style={{
             background: `linear-gradient(to right, #3b82f6 ${percentage}%, rgb(226 232 240) ${percentage}%)`,
