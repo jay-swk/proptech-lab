@@ -1,0 +1,105 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "PropTech Lab 로고 PropTech Lab 인터랙티브 프롭테크 학습" [ref=e4] [cursor=pointer]:
+        - /url: /proptech-lab
+        - img "PropTech Lab 로고" [ref=e5]
+        - generic [ref=e6]: PropTech Lab
+        - generic [ref=e7]: 인터랙티브 프롭테크 학습
+      - generic [ref=e8]:
+        - navigation [ref=e9]:
+          - link "홈" [ref=e10] [cursor=pointer]:
+            - /url: /proptech-lab
+          - link "시뮬레이터" [ref=e11] [cursor=pointer]:
+            - /url: /proptech-lab/simulator
+          - link "개념 사전" [ref=e12] [cursor=pointer]:
+            - /url: /proptech-lab/concepts
+        - button "라이트 모드로 전환" [ref=e13]:
+          - img [ref=e14]
+  - main [ref=e17]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]: 인터랙티브 프롭테크 학습
+        - heading "이 땅에 어떤 건물을 지을 수 있을까?" [level=1] [ref=e27]:
+          - text: 이 땅에 어떤 건물을
+          - text: 지을 수 있을까?
+        - paragraph [ref=e28]: 용적률, 건폐율, 대지면적을 직접 조작하며 건물 규모를 실시간으로 계산하고 3D로 확인하세요. 수익성 분석까지 한 번에.
+        - generic [ref=e29]:
+          - link "시뮬레이터 시작하기" [ref=e30] [cursor=pointer]:
+            - /url: /proptech-lab/simulator
+            - text: 시뮬레이터 시작하기
+            - img [ref=e31]
+          - link "개념 먼저 보기" [ref=e33] [cursor=pointer]:
+            - /url: /proptech-lab/concepts
+      - img "PropTech Lab 마스코트 — 친근한 건물 캐릭터" [ref=e35]
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - heading "이렇게 배웁니다" [level=2] [ref=e38]
+        - paragraph [ref=e39]: 이론 암기가 아닌, 직접 조작하며 이해하는 학습 방식
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]: ⚡
+          - heading "실시간 시뮬레이션" [level=3] [ref=e43]
+          - paragraph [ref=e44]: 슬라이더를 움직이는 즉시 건축면적, 연면적, 최대 층수가 자동으로 계산됩니다.
+        - generic [ref=e45]:
+          - generic [ref=e46]: 🏗️
+          - heading "3D 건물 시각화" [level=3] [ref=e47]
+          - paragraph [ref=e48]: 입력한 조건의 건물을 3D로 바로 확인하세요. 회전하고 확대하며 규모를 직관적으로 파악합니다.
+        - generic [ref=e49]:
+          - generic [ref=e50]: 🏘️
+          - heading "용도지역 프리셋" [level=3] [ref=e51]
+          - paragraph [ref=e52]: 서울 주요 9개 용도지역의 법적 건폐율·용적률 제한을 자동으로 적용합니다.
+        - generic [ref=e53]:
+          - generic [ref=e54]: 💰
+          - heading "수익성 간이 분석" [level=3] [ref=e55]
+          - paragraph [ref=e56]: 건축비, 월/연 임대수익, 투자회수기간, 수익률을 한눈에 파악합니다.
+        - generic [ref=e57]:
+          - generic [ref=e58]: 📊
+          - heading "시나리오 비교" [level=3] [ref=e59]
+          - paragraph [ref=e60]: 강남 vs 마포, 주거 vs 상업 — 두 조건을 나란히 비교하고 최적 전략을 찾으세요.
+        - generic [ref=e61]:
+          - generic [ref=e62]: ✏️
+          - heading "퀴즈로 복습" [level=3] [ref=e63]
+          - paragraph [ref=e64]: 배운 개념을 4지선다 퀴즈로 바로 확인. 틀리면 해설과 함께 다시 배웁니다.
+    - generic [ref=e66]:
+      - heading "3단계로 끝납니다" [level=2] [ref=e68]
+      - generic [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e72]: "01"
+          - heading "실제 사례 선택" [level=3] [ref=e73]
+          - paragraph [ref=e74]: 강남 단독, 홍대 상가, 성수 카페 등 6개 실제 사례 중 하나를 선택하세요.
+        - generic [ref=e75]:
+          - generic [ref=e77]: "02"
+          - heading "조건 조정 & 비교" [level=3] [ref=e78]
+          - paragraph [ref=e79]: 슬라이더로 값을 바꾸고, 시나리오를 저장해 A vs B 비교를 해보세요.
+        - generic [ref=e80]:
+          - generic [ref=e81]: "03"
+          - heading "수익까지 확인" [level=3] [ref=e82]
+          - paragraph [ref=e83]: 3D 건물과 함께 건축비, 임대수익, 수익률까지 실시간으로 확인합니다.
+    - generic [ref=e84]:
+      - heading "자주 묻는 질문" [level=2] [ref=e86]
+      - generic [ref=e87]:
+        - generic [ref=e88]:
+          - heading "무료인가요?" [level=3] [ref=e89]
+          - paragraph [ref=e90]: 네, 완전 무료입니다. 회원가입도 필요 없습니다.
+        - generic [ref=e91]:
+          - heading "데이터는 정확한가요?" [level=3] [ref=e92]
+          - paragraph [ref=e93]: 용적률·건폐율 상한은 국토계획법 기준입니다. 수익 분석 단가는 서울 평균 참고값이며, 직접 수정할 수 있습니다.
+        - generic [ref=e94]:
+          - heading "모바일에서도 되나요?" [level=3] [ref=e95]
+          - paragraph [ref=e96]: 네, 반응형으로 제작되어 스마트폰에서도 사용할 수 있습니다. 3D 시각화도 모바일에서 동작합니다.
+        - generic [ref=e97]:
+          - heading "실제 투자 판단에 사용해도 되나요?" [level=3] [ref=e98]
+          - paragraph [ref=e99]: 간이 분석 목적으로 제작되었습니다. 실제 투자는 전문가 상담과 정밀 분석이 반드시 필요합니다.
+    - generic [ref=e101]:
+      - heading "지금 바로 시작해보세요" [level=2] [ref=e102]
+      - paragraph [ref=e103]: 강남 단독주택지 100평에 용적률 250%를 적용하면 몇 층짜리 건물이 가능하고, 수익은 얼마일까요?
+      - link "시뮬레이터 바로가기" [ref=e104] [cursor=pointer]:
+        - /url: /proptech-lab/simulator
+        - text: 시뮬레이터 바로가기
+        - img [ref=e105]
+  - contentinfo [ref=e107]:
+    - generic [ref=e108]:
+      - paragraph [ref=e109]: PropTech Lab — 프롭테크 개념을 쉽게 이해하는 인터랙티브 학습 서비스
+      - paragraph [ref=e110]: 본 계산 결과는 학습 목적이며, 실제 건축 인허가 기준과 다를 수 있습니다.
+  - alert [ref=e111]

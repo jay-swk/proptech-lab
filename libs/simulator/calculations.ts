@@ -76,7 +76,7 @@ export const REAL_WORLD_PRESETS: RealWorldPreset[] = [
   { id: "gangnam-house", label: "강남 단독주택지", description: "강남 대치동 100평 단독", zoningType: "residential-2-general", params: { landArea: 330, floorAreaRatio: 250, buildingCoverageRatio: 60, floors: 4 } },
   { id: "mapo-multi", label: "마포 다세대", description: "마포구 60평 다세대", zoningType: "residential-2-general", params: { landArea: 200, floorAreaRatio: 250, buildingCoverageRatio: 60, floors: 5 } },
   { id: "hongdae-commercial", label: "홍대 근생", description: "홍대입구역 상가건물", zoningType: "neighborhood-commercial", params: { landArea: 150, floorAreaRatio: 600, buildingCoverageRatio: 70, floors: 8 } },
-  { id: "gangnam-office", label: "강남역 오피스", description: "강남역 대로변 오피스", zoningType: "general-commercial", params: { landArea: 500, floorAreaRatio: 1000, buildingCoverageRatio: 80, floors: 15 } },
+  { id: "gangnam-office", label: "강남역 오피스", description: "강남역 대로변 오피스", zoningType: "general-commercial", params: { landArea: 500, floorAreaRatio: 1000, buildingCoverageRatio: 80, floors: 12 } },
   { id: "seongsu-cafe", label: "성수 카페거리", description: "성수동 카페/공방", zoningType: "quasi-industrial", params: { landArea: 250, floorAreaRatio: 400, buildingCoverageRatio: 70, floors: 5 } },
   { id: "eunpyeong-villa", label: "은평 신축빌라", description: "은평구 소규모 빌라", zoningType: "residential-1-general", params: { landArea: 280, floorAreaRatio: 200, buildingCoverageRatio: 60, floors: 4 } },
 ];
