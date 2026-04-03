@@ -33,11 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# playwright
+# playwright & screenshots
 .playwright-mcp/
-simulator-*.png
-landing.png
-concepts.png
+*.png
+!public/*.png
 
 # vercel
 .vercel
