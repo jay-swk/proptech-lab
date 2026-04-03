@@ -2,9 +2,13 @@ import { create } from "zustand";
 import {
   calculate,
   calculateProfit,
+  calculateFinance,
   DEFAULT_PARAMS,
   DEFAULT_PROFIT_PARAMS,
+  DEFAULT_FINANCE_PARAMS,
   getZoningPreset,
+  type FinanceParams,
+  type FinanceResults,
   type ProfitParams,
   type ProfitResults,
   type RealWorldPreset,
@@ -28,6 +32,12 @@ const initialProfitResults = calculateProfit(
   initialResults.actualFloorArea,
   initialProfitParams,
 );
+const initialFinanceResults = calculateFinance(
+  DEFAULT_PARAMS.landArea,
+  initialProfitResults.totalConstructionCost,
+  initialProfitResults.monthlyRentalIncome,
+  DEFAULT_FINANCE_PARAMS,
+);
 
 interface SimulatorStore {
   params: SimulatorParams;
@@ -35,14 +45,30 @@ interface SimulatorStore {
   zoningType: ZoningType;
   profitParams: ProfitParams;
   profitResults: ProfitResults;
+  financeParams: FinanceParams;
+  financeResults: FinanceResults;
   savedScenario: ScenarioSnapshot | null;
   updateParam: (key: keyof SimulatorParams, value: number) => void;
   setZoningType: (type: ZoningType) => void;
   updateProfitParam: (key: keyof ProfitParams, value: number) => void;
+  updateFinanceParam: (key: keyof FinanceParams, value: number) => void;
   resetToDefault: () => void;
   loadPreset: (preset: RealWorldPreset) => void;
   saveScenario: (label?: string) => void;
   clearScenario: () => void;
+}
+
+function recalcFinance(
+  landArea: number,
+  profitResults: ProfitResults,
+  financeParams: FinanceParams,
+): FinanceResults {
+  return calculateFinance(
+    landArea,
+    profitResults.totalConstructionCost,
+    profitResults.monthlyRentalIncome,
+    financeParams,
+  );
 }
 
 export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
@@ -51,19 +77,20 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
   zoningType: "custom",
   profitParams: initialProfitParams,
   profitResults: initialProfitResults,
+  financeParams: DEFAULT_FINANCE_PARAMS,
+  financeResults: initialFinanceResults,
   savedScenario: null,
 
   updateParam: (key, value) =>
     set((state) => {
       const newParams = { ...state.params, [key]: value };
       const results = calculate(newParams);
+      const profitResults = calculateProfit(results.actualFloorArea, state.profitParams);
       return {
         params: newParams,
         results,
-        profitResults: calculateProfit(
-          results.actualFloorArea,
-          state.profitParams,
-        ),
+        profitResults,
+        financeResults: recalcFinance(newParams.landArea, profitResults, state.financeParams),
       };
     }),
 
@@ -74,60 +101,70 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       const newParams = {
         ...state.params,
         floorAreaRatio: Math.min(state.params.floorAreaRatio, preset.maxFAR),
-        buildingCoverageRatio: Math.min(
-          state.params.buildingCoverageRatio,
-          preset.maxBCR,
-        ),
+        buildingCoverageRatio: Math.min(state.params.buildingCoverageRatio, preset.maxBCR),
       };
       const results = calculate(newParams);
+      const profitResults = calculateProfit(results.actualFloorArea, newProfitParams);
       return {
         zoningType: type,
         params: newParams,
         results,
         profitParams: newProfitParams,
-        profitResults: calculateProfit(
-          results.actualFloorArea,
-          newProfitParams,
-        ),
+        profitResults,
+        financeResults: recalcFinance(newParams.landArea, profitResults, state.financeParams),
       };
     }),
 
   updateProfitParam: (key, value) =>
     set((state) => {
       const newProfitParams = { ...state.profitParams, [key]: value };
+      const profitResults = calculateProfit(state.results.actualFloorArea, newProfitParams);
       return {
         profitParams: newProfitParams,
-        profitResults: calculateProfit(
-          state.results.actualFloorArea,
-          newProfitParams,
-        ),
+        profitResults,
+        financeResults: recalcFinance(state.params.landArea, profitResults, state.financeParams),
       };
     }),
 
-  resetToDefault: () =>
+  updateFinanceParam: (key, value) =>
+    set((state) => ({
+      financeParams: { ...state.financeParams, [key]: value },
+      financeResults: recalcFinance(
+        state.params.landArea,
+        state.profitResults,
+        { ...state.financeParams, [key]: value },
+      ),
+    })),
+
+  resetToDefault: () => {
+    const results = calculate(DEFAULT_PARAMS);
+    const profitParams = DEFAULT_PROFIT_PARAMS.residential;
+    const profitResults = calculateProfit(results.actualFloorArea, profitParams);
     set({
       params: DEFAULT_PARAMS,
-      results: calculate(DEFAULT_PARAMS),
+      results,
       zoningType: "custom",
-      profitParams: DEFAULT_PROFIT_PARAMS.residential,
-      profitResults: calculateProfit(
-        calculate(DEFAULT_PARAMS).actualFloorArea,
-        DEFAULT_PROFIT_PARAMS.residential,
-      ),
+      profitParams,
+      profitResults,
+      financeParams: DEFAULT_FINANCE_PARAMS,
+      financeResults: recalcFinance(DEFAULT_PARAMS.landArea, profitResults, DEFAULT_FINANCE_PARAMS),
       savedScenario: null,
-    }),
+    });
+  },
 
   loadPreset: (preset) =>
-    set(() => {
+    set((state) => {
       const zoningPreset = getZoningPreset(preset.zoningType);
       const profitParams = DEFAULT_PROFIT_PARAMS[zoningPreset.usageCategory];
       const results = calculate(preset.params);
+      const profitResults = calculateProfit(results.actualFloorArea, profitParams);
       return {
         zoningType: preset.zoningType,
         params: preset.params,
         results,
         profitParams,
-        profitResults: calculateProfit(results.actualFloorArea, profitParams),
+        profitResults,
+        financeResults: recalcFinance(preset.params.landArea, profitResults, state.financeParams),
       };
     }),
 

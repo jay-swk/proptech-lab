@@ -130,6 +130,75 @@ export function calculateProfit(
   };
 }
 
+// --- 상세 금융 분석 ---
+
+export interface FinanceParams {
+  landCostPerPyeong: number;    // 토지 평당가 (만원)
+  acquisitionTaxRate: number;   // 취득세율 (%)
+  ltvRatio: number;             // 대출비율 (%)
+  loanInterestRate: number;     // 대출금리 (연 %)
+  miscCostRate: number;         // 부대비용율 (%)
+  vacancyRate: number;          // 공실률 (%)
+}
+
+export interface FinanceResults {
+  landCost: number;             // 토지비 (만원)
+  acquisitionTax: number;       // 취득세 (만원)
+  miscCost: number;             // 부대비용 (만원)
+  totalProjectCost: number;     // 총 사업비 (만원)
+  equity: number;               // 자기자본 (만원)
+  loanAmount: number;           // 대출금 (만원)
+  monthlyLoanInterest: number;  // 월 대출이자 (만원)
+  netMonthlyIncome: number;     // 순 월수익 (만원)
+  netAnnualIncome: number;      // 순 연수익 (만원)
+  equityYield: number;          // 자기자본 수익률 (%)
+  netPaybackYears: number;      // 실 투자회수 기간 (년)
+}
+
+export const DEFAULT_FINANCE_PARAMS: FinanceParams = {
+  landCostPerPyeong: 3000,
+  acquisitionTaxRate: 4.6,
+  ltvRatio: 60,
+  loanInterestRate: 4.5,
+  miscCostRate: 5,
+  vacancyRate: 5,
+};
+
+export function calculateFinance(
+  landArea: number,
+  constructionCost: number,
+  monthlyRental: number,
+  financeParams: FinanceParams,
+): FinanceResults {
+  const landPyeong = landArea / SQM_PER_PYEONG;
+  const landCost = landPyeong * financeParams.landCostPerPyeong;
+  const acquisitionTax = (landCost + constructionCost) * (financeParams.acquisitionTaxRate / 100);
+  const miscCost = (landCost + constructionCost) * (financeParams.miscCostRate / 100);
+  const totalProjectCost = landCost + constructionCost + acquisitionTax + miscCost;
+  const loanAmount = totalProjectCost * (financeParams.ltvRatio / 100);
+  const equity = totalProjectCost - loanAmount;
+  const monthlyLoanInterest = loanAmount * (financeParams.loanInterestRate / 100) / 12;
+  const effectiveMonthlyRental = monthlyRental * (1 - financeParams.vacancyRate / 100);
+  const netMonthlyIncome = effectiveMonthlyRental - monthlyLoanInterest;
+  const netAnnualIncome = netMonthlyIncome * 12;
+  const equityYield = equity > 0 ? (netAnnualIncome / equity) * 100 : 0;
+  const netPaybackYears = netAnnualIncome > 0 ? equity / netAnnualIncome : 0;
+
+  return {
+    landCost,
+    acquisitionTax,
+    miscCost,
+    totalProjectCost,
+    equity,
+    loanAmount,
+    monthlyLoanInterest,
+    netMonthlyIncome,
+    netAnnualIncome,
+    equityYield,
+    netPaybackYears,
+  };
+}
+
 export function formatKrw(manwon: number): string {
   if (manwon === 0) return "0원";
   const rounded = Math.round(manwon);

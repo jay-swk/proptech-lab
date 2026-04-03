@@ -14,28 +14,24 @@ export function RealWorldPresets() {
     preset.params.floors === params.floors;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-3">
-      <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-        실제 사례로 시작하기
-      </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {REAL_WORLD_PRESETS.map((preset) => (
-          <button
-            key={preset.id}
-            onClick={() => loadPreset(preset)}
-            className={`text-left px-3 py-2.5 rounded-lg border text-xs transition-colors ${
-              isActive(preset)
-                ? "bg-blue-50 dark:bg-blue-950 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
-                : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750"
-            }`}
-          >
-            <span className="font-medium block">{preset.label}</span>
-            <span className="text-slate-400 dark:text-slate-500 block mt-0.5">
-              {preset.description}
-            </span>
-          </button>
-        ))}
-      </div>
+    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 flex-shrink-0">
+        사례:
+      </span>
+      {REAL_WORLD_PRESETS.map((preset) => (
+        <button
+          key={preset.id}
+          onClick={() => loadPreset(preset)}
+          title={preset.description}
+          className={`flex-shrink-0 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+            isActive(preset)
+              ? "bg-blue-50 dark:bg-blue-950 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
+              : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-750"
+          }`}
+        >
+          {preset.label}
+        </button>
+      ))}
     </div>
   );
 }

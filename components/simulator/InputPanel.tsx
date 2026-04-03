@@ -3,66 +3,32 @@
 import { useSimulatorStore } from "@/store/simulatorStore";
 import { PARAM_RANGES, getZoningPreset } from "@/libs/simulator/calculations";
 import { SliderInput } from "@/components/ui/SliderInput";
+import { ZoningSelector } from "./ZoningSelector";
 
 const PARAM_CONFIG = {
-  landArea: {
-    label: "대지면적",
-    unit: "m²",
-    tooltip: "건물을 지을 수 있는 땅의 면적입니다. 330m²는 약 100평입니다.",
-  },
-  floorAreaRatio: {
-    label: "용적률",
-    unit: "%",
-    tooltip:
-      "대지면적 대비 건물 연면적의 비율입니다. 용도지역마다 법정 한도가 다릅니다.",
-  },
-  buildingCoverageRatio: {
-    label: "건폐율",
-    unit: "%",
-    tooltip:
-      "대지면적 대비 건물 바닥면적(건축면적)의 비율입니다. 건물이 땅을 얼마나 덮는지를 나타냅니다.",
-  },
-  floors: {
-    label: "층수",
-    unit: "층",
-    tooltip: "건물의 층수입니다. 용적률 한도를 초과하면 경고가 표시됩니다.",
-  },
+  landArea: { label: "대지면적", unit: "m²", tooltip: "건물을 지을 수 있는 땅의 면적" },
+  floorAreaRatio: { label: "용적률", unit: "%", tooltip: "대지면적 대비 연면적 비율" },
+  buildingCoverageRatio: { label: "건폐율", unit: "%", tooltip: "대지면적 대비 건축면적 비율" },
+  floors: { label: "층수", unit: "층", tooltip: "건물의 층수" },
 } as const;
 
 export function InputPanel() {
-  const { params, zoningType, updateParam, resetToDefault } =
+  const { params, zoningType, updateParam, resetToDefault, saveScenario } =
     useSimulatorStore();
 
   const preset = getZoningPreset(zoningType);
-
   const dynamicRanges = {
     ...PARAM_RANGES,
-    floorAreaRatio: {
-      ...PARAM_RANGES.floorAreaRatio,
-      max: preset.maxFAR,
-    },
-    buildingCoverageRatio: {
-      ...PARAM_RANGES.buildingCoverageRatio,
-      max: preset.maxBCR,
-    },
+    floorAreaRatio: { ...PARAM_RANGES.floorAreaRatio, max: preset.maxFAR },
+    buildingCoverageRatio: { ...PARAM_RANGES.buildingCoverageRatio, max: preset.maxBCR },
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-          건물 조건 설정
-        </h2>
-        <button
-          onClick={resetToDefault}
-          className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-2 transition-colors"
-        >
-          기본값 초기화
-        </button>
-      </div>
+    <div className="space-y-4">
+      <ZoningSelector />
 
-      {(Object.keys(PARAM_CONFIG) as Array<keyof typeof PARAM_CONFIG>).map(
-        (key) => {
+      <div className="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-3">
+        {(Object.keys(PARAM_CONFIG) as Array<keyof typeof PARAM_CONFIG>).map((key) => {
           const cfg = PARAM_CONFIG[key];
           const range = dynamicRanges[key];
           return (
@@ -76,10 +42,26 @@ export function InputPanel() {
               step={range.step}
               onChange={(v) => updateParam(key, v)}
               tooltip={cfg.tooltip}
+              compact
             />
           );
-        },
-      )}
+        })}
+      </div>
+
+      <div className="flex gap-2 pt-1">
+        <button
+          onClick={() => saveScenario()}
+          className="flex-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg py-1.5 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
+        >
+          시나리오 저장
+        </button>
+        <button
+          onClick={resetToDefault}
+          className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-2"
+        >
+          초기화
+        </button>
+      </div>
     </div>
   );
 }

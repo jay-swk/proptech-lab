@@ -117,7 +117,7 @@ function Scene() {
 
 export function BuildingScene() {
   return (
-    <div className="w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+    <div className="w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
       <Canvas
         camera={{ position: [4, 4, 4], fov: 45 }}
         shadows

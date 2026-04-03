@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { concepts } from "@/content/concepts";
-import { ConceptCard } from "@/components/concepts/ConceptCard";
+import { ConceptsGrid } from "@/components/concepts/ConceptsGrid";
 
 export const metadata: Metadata = {
   title: "개념 사전 | PropTech Lab",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ConceptsPage() {
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
           프롭테크 개념 사전
@@ -20,11 +20,7 @@ export default function ConceptsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {concepts.map((concept) => (
-          <ConceptCard key={concept.slug} concept={concept} />
-        ))}
-      </div>
+      <ConceptsGrid concepts={concepts} />
     </main>
   );
 }
